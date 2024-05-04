@@ -52,7 +52,7 @@ fn ego_camera(
     mouse_motion.clear();
 
     for (mut tform, mut rotation) in query.iter_mut() {
-        rotation.yaw += delta.x * MOUSE_SENSITIVITY;
+        rotation.yaw -= delta.x * MOUSE_SENSITIVITY;
         rotation.pitch += delta.y * MOUSE_SENSITIVITY;
         rotation.pitch = rotation.pitch.clamp(-89.9f32, 89.9f32);
 
