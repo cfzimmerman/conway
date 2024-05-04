@@ -1,4 +1,7 @@
-use bevy::{input::mouse::MouseMotion, prelude::*};
+use bevy::{input::mouse::MouseMotion, prelude::*, window::PrimaryWindow};
+
+const MOUSE_SENSITIVITY: f32 = 0.2;
+const POSITION_INCR: f32 = 0.06;
 
 #[derive(Component, Default)]
 struct CameraRotation {
@@ -39,11 +42,10 @@ fn setup_scene(mut commands: Commands) {
     ));
 }
 
-const MOUSE_SENSITIVITY: f32 = 0.2;
-
+/// Moves the camera roll-free Minecraft style.
 fn ego_camera(
     mut mouse_motion: EventReader<MouseMotion>,
-    mut query: Query<(&mut Transform, &mut CameraRotation)>,
+    mut camera: Query<(&mut Transform, &mut CameraRotation)>,
 ) {
     let delta = mouse_motion
         .read()
@@ -51,9 +53,9 @@ fn ego_camera(
         .fold(Vec2::ZERO, |acc, pos| acc + pos.delta);
     mouse_motion.clear();
 
-    for (mut tform, mut rotation) in query.iter_mut() {
+    for (mut tform, mut rotation) in camera.iter_mut() {
         rotation.yaw -= delta.x * MOUSE_SENSITIVITY;
-        rotation.pitch += delta.y * MOUSE_SENSITIVITY;
+        rotation.pitch -= delta.y * MOUSE_SENSITIVITY;
         rotation.pitch = rotation.pitch.clamp(-89.9f32, 89.9f32);
 
         let yaw_rotation = Quat::from_axis_angle(Vec3::Y, rotation.yaw.to_radians());
@@ -63,7 +65,65 @@ fn ego_camera(
     }
 }
 
+fn print_keybindings() {
+    let bindings = r#"
+Keybindings:
+
+- w: forward
+- a: left
+- s: back
+- d: right
+- space: up
+- shift: down
+- escape: exit
+"#;
+    println!("{bindings}");
+}
+
+// TODO: Filter out keyboard input if the window is not the primary one
+
+/// Handles keybindings and camera movement.
+fn watch_keyboard(
+    keys: Res<ButtonInput<KeyCode>>,
+    mut camera: Query<(&mut Transform, &CameraRotation)>,
+) {
+    for (mut tform, _) in camera.iter_mut() {
+        if keys.pressed(KeyCode::KeyW) {
+            let mut fwd: Vec3 = tform.forward().into();
+            fwd.y = 0.;
+            tform.translation += fwd.normalize_or_zero() * POSITION_INCR;
+        }
+        if keys.pressed(KeyCode::KeyS) {
+            let mut back: Vec3 = tform.back().into();
+            back.y = 0.;
+            tform.translation += back.normalize_or_zero() * POSITION_INCR;
+        }
+        if keys.pressed(KeyCode::KeyA) {
+            let mut left: Vec3 = tform.left().into();
+            left.y = 0.;
+            tform.translation += left.normalize_or_zero() * POSITION_INCR;
+        }
+        if keys.pressed(KeyCode::KeyD) {
+            let mut right: Vec3 = tform.right().into();
+            right.y = 0.;
+            tform.translation += right.normalize_or_zero() * POSITION_INCR;
+        }
+        if keys.pressed(KeyCode::Space) {
+            tform.translation += Vec3::new(0., 1., 0.) * POSITION_INCR;
+        }
+        if keys.pressed(KeyCode::ShiftLeft) || keys.pressed(KeyCode::ShiftLeft) {
+            tform.translation -= Vec3::new(0., 1., 0.) * POSITION_INCR;
+        }
+    }
+}
+
+/// Makes the cursor invisible over the main window.
+fn hide_cursor(mut primary_window: Query<&mut Window, With<PrimaryWindow>>) {
+    (&mut primary_window.single_mut()).cursor.visible = false;
+}
+
 fn main() {
+    print_keybindings();
     App::new()
         .add_plugins(DefaultPlugins)
         .insert_resource(ClearColor(Color::Rgba {
@@ -76,7 +136,13 @@ fn main() {
             brightness: 750.,
             ..AmbientLight::default()
         })
-        .add_systems(Startup, (setup_scene, spawn_cube))
-        .add_systems(Update, ego_camera)
+        .add_systems(Startup, (hide_cursor, setup_scene, spawn_cube))
+        .add_systems(
+            Update,
+            (
+                (ego_camera, watch_keyboard).chain(),
+                bevy::window::close_on_esc,
+            ),
+        )
         .run();
 }
