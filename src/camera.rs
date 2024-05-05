@@ -1,4 +1,8 @@
+use std::time::Duration;
+
 use bevy::{input::mouse::MouseMotion, prelude::*, window::PrimaryWindow};
+
+use crate::gol::ConwayGol;
 
 const MOUSE_SENSITIVITY: f32 = 0.2;
 const POSITION_INCR: f32 = 0.25;
@@ -9,11 +13,22 @@ pub struct CameraRotation {
     pitch: f32,
 }
 
+#[derive(Component)]
+pub struct GameTimer(pub Timer);
+
+impl Default for GameTimer {
+    fn default() -> Self {
+        GameTimer(Timer::new(Duration::from_millis(250), TimerMode::Repeating))
+    }
+}
+
 /// Handles keybindings and camera movement.
 pub fn keyboard_motion(
     keys: Res<ButtonInput<KeyCode>>,
     mut camera: Query<(&mut Transform, &CameraRotation)>,
     windows: Query<&Window>,
+    mut ctrl_menu: Query<(&mut Visibility, &ControlMenu)>,
+    mut game_timer: Query<(&ConwayGol, &mut GameTimer)>,
 ) {
     let mut window_focused = false;
     for window in windows.iter() {
@@ -55,6 +70,27 @@ pub fn keyboard_motion(
         if keys.pressed(KeyCode::ShiftLeft) || keys.pressed(KeyCode::ShiftLeft) {
             tform.translation -= Vec3::new(0., 1., 0.) * POSITION_INCR;
         }
+        if keys.just_pressed(KeyCode::KeyH) {
+            let (mut vis, _) = ctrl_menu.single_mut();
+            *vis = if *vis == Visibility::Hidden {
+                Visibility::Visible
+            } else {
+                Visibility::Hidden
+            };
+        }
+        if keys.just_pressed(KeyCode::ArrowUp) {
+            let (_, mut timer) = game_timer.single_mut();
+            let new_duration = timer.0.duration() / 2;
+            if new_duration < Duration::from_millis(125) {
+                return;
+            }
+            timer.0.set_duration(new_duration);
+        }
+        if keys.just_pressed(KeyCode::ArrowDown) {
+            let (_, mut timer) = game_timer.single_mut();
+            let new_duration = timer.0.duration() * 2;
+            timer.0.set_duration(new_duration);
+        }
     }
 }
 
@@ -81,9 +117,12 @@ pub fn ego_camera(
     }
 }
 
-pub fn print_keybindings() {
+#[derive(Component)]
+pub struct ControlMenu;
+
+pub fn display_controls(mut commands: Commands) {
     let bindings = r#"
-Keybindings:
+- h: hide/show this menu
 
 - w: forward
 - a: left
@@ -91,9 +130,33 @@ Keybindings:
 - d: right
 - space: up
 - shift: down
+- left click: pause/play
+- up arrow: speed 2x
+- down arrow: speed 0.5x
 - escape: exit
 "#;
-    println!("{bindings}");
+
+    commands.spawn((
+        TextBundle {
+            text: Text::from_section(
+                bindings,
+                TextStyle {
+                    font_size: 18.,
+                    color: Color::WHITE,
+                    ..default()
+                },
+            ),
+            visibility: Visibility::Visible,
+            ..default()
+        }
+        .with_style(Style {
+            position_type: PositionType::Absolute,
+            top: Val::Px(18.),
+            left: Val::Px(18.),
+            ..default()
+        }),
+        ControlMenu,
+    ));
 }
 
 /// Makes the cursor invisible over the main window.

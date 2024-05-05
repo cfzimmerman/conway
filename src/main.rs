@@ -1,13 +1,13 @@
-use bevy::{prelude::*, time::common_conditions::on_timer};
+use bevy::prelude::*;
 use conway::{
-    camera::{ego_camera, hide_cursor, keyboard_motion, print_keybindings, CameraRotation},
+    camera::{
+        display_controls, ego_camera, hide_cursor, keyboard_motion, CameraRotation, GameTimer,
+    },
     gol::ConwayGol,
 };
-use std::time::Duration;
 
 const BOARD_SIZE: usize = 2usize.pow(6);
 const CUBE_SPACING: f32 = 2.25;
-const TICK_SPEED: Duration = Duration::from_millis(250);
 
 #[derive(Component, Default)]
 pub struct CubeInd {
@@ -31,6 +31,8 @@ fn init_conway_grid(
         .insert(GlobalTransform::default())
         .insert(InheritedVisibility::default())
         .insert(gol)
+        .insert(Paused(false))
+        .insert(GameTimer::default())
         .with_children(|parent| {
             let middle_cube = BOARD_SIZE as f32 / 2.;
             let board_offset = BOARD_SIZE / 2;
@@ -58,11 +60,43 @@ fn init_conway_grid(
         });
 }
 
-fn next_game_tick(
-    mut game_state: Query<&mut ConwayGol>,
-    mut cubes: Query<(&mut Visibility, &CubeInd)>,
+#[derive(Component)]
+pub struct Paused(bool);
+
+impl Paused {
+    pub fn toggle(&mut self) {
+        self.0 = !self.0;
+    }
+
+    #[inline]
+    pub fn is_paused(&self) -> bool {
+        self.0
+    }
+}
+
+fn handle_click(
+    buttons: Res<ButtonInput<MouseButton>>,
+    mut game_state: Query<(&ConwayGol, &mut Paused)>,
 ) {
-    let mut game_state = game_state.single_mut();
+    if buttons.just_pressed(MouseButton::Left) {
+        let (_, mut sim) = game_state.single_mut();
+        sim.toggle();
+    }
+}
+
+fn next_game_tick(
+    mut game_state: Query<(&mut ConwayGol, &Paused, &mut GameTimer)>,
+    mut cubes: Query<(&mut Visibility, &CubeInd)>,
+    time: Res<Time>,
+) {
+    let (mut game_state, sim, mut timer) = game_state.single_mut();
+    if !timer.0.tick(time.delta()).finished() {
+        return;
+    }
+
+    if sim.is_paused() {
+        return;
+    }
     game_state.tick();
     let board = game_state.board();
 
@@ -87,7 +121,6 @@ fn setup_scene(mut commands: Commands) {
 }
 
 fn main() {
-    print_keybindings();
     App::new()
         .add_plugins(DefaultPlugins)
         .insert_resource(ClearColor(Color::Rgba {
@@ -100,12 +133,16 @@ fn main() {
             color: Color::WHITE,
             brightness: 1000.,
         })
-        .add_systems(Startup, (hide_cursor, setup_scene, init_conway_grid))
+        .add_systems(
+            Startup,
+            (hide_cursor, setup_scene, init_conway_grid, display_controls),
+        )
         .add_systems(
             Update,
             (
                 (ego_camera, keyboard_motion).chain(),
-                next_game_tick.run_if(on_timer(TICK_SPEED)),
+                next_game_tick,
+                handle_click,
                 bevy::window::close_on_esc,
             ),
         )
