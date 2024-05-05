@@ -44,7 +44,8 @@ fn init_conway_grid(
                         PbrBundle {
                             mesh: cube_mesh.clone(),
                             material: materials.add(StandardMaterial {
-                                base_color: Color::BLACK,
+                                // alpha_mode: AlphaMode::Blend,
+                                base_color: Color::WHITE,
                                 ..default()
                             }),
                             transform: Transform::from_xyz(x, 0., z),
@@ -59,21 +60,17 @@ fn init_conway_grid(
 
 fn next_game_tick(
     mut game_state: Query<&mut ConwayGol>,
-    mut cubes: Query<(&Handle<StandardMaterial>, &CubeInd)>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
+    mut cubes: Query<(&mut Visibility, &CubeInd)>,
 ) {
     let mut game_state = game_state.single_mut();
     game_state.tick();
     let board = game_state.board();
 
-    for (handle, pos) in &mut cubes {
-        let Some(mat) = materials.get_mut(handle) else {
-            continue;
-        };
-        mat.base_color = if board[pos.row][pos.col] {
-            Color::ORANGE_RED
+    for (mut vis, pos) in &mut cubes {
+        *vis = if board[pos.row][pos.col] {
+            Visibility::Visible
         } else {
-            Color::WHITE
+            Visibility::Hidden
         };
     }
 }
