@@ -129,10 +129,12 @@ fn main() {
             blue: 0.,
             alpha: 0.5,
         }))
+        /*
         .insert_resource(AmbientLight {
             color: Color::WHITE,
             brightness: 1000.,
         })
+        */
         .add_systems(
             Startup,
             (hide_cursor, setup_scene, init_conway_grid, display_controls),
