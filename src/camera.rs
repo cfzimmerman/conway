@@ -1,7 +1,7 @@
 use bevy::{input::mouse::MouseMotion, prelude::*, window::PrimaryWindow};
 
 const MOUSE_SENSITIVITY: f32 = 0.2;
-const POSITION_INCR: f32 = 0.06;
+const POSITION_INCR: f32 = 0.25;
 
 #[derive(Component, Default)]
 pub struct CameraRotation {
