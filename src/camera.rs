@@ -18,7 +18,7 @@ pub struct GameTimer(pub Timer);
 
 impl Default for GameTimer {
     fn default() -> Self {
-        GameTimer(Timer::new(Duration::from_millis(250), TimerMode::Repeating))
+        GameTimer(Timer::new(Duration::from_millis(500), TimerMode::Repeating))
     }
 }
 

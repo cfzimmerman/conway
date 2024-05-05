@@ -25,6 +25,11 @@ fn init_conway_grid(
         .expect("Conway grid must initialize in order to continue");
 
     let cube_mesh = meshes.add(Cuboid::new(2., 2., 2.));
+    let cube_mat = materials.add(StandardMaterial {
+        base_color: Color::WHITE,
+        perceptual_roughness: 0.08,
+        ..default()
+    });
     commands
         .spawn_empty()
         .insert(Transform::default())
@@ -45,11 +50,7 @@ fn init_conway_grid(
                     parent.spawn((
                         PbrBundle {
                             mesh: cube_mesh.clone(),
-                            material: materials.add(StandardMaterial {
-                                // alpha_mode: AlphaMode::Blend,
-                                base_color: Color::WHITE,
-                                ..default()
-                            }),
+                            material: cube_mat.clone(),
                             transform: Transform::from_xyz(x, 0., z),
                             ..Default::default()
                         },
@@ -109,7 +110,11 @@ fn next_game_tick(
     }
 }
 
-fn setup_scene(mut commands: Commands) {
+fn setup_scene(
+    mut commands: Commands,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+) {
     let offset = BOARD_SIZE as f32;
     commands.spawn((
         Camera3dBundle {
@@ -118,6 +123,53 @@ fn setup_scene(mut commands: Commands) {
         },
         CameraRotation::default(),
     ));
+
+    commands.spawn(PbrBundle {
+        mesh: meshes.add(Plane3d::default().mesh().size(1000.0, 1000.0)),
+        material: materials.add(StandardMaterial {
+            base_color: Color::rgb(0.2, 0.2, 0.2),
+            perceptual_roughness: 0.08,
+            ..default()
+        }),
+        transform: Transform::from_xyz(-offset * 3., 0., -offset * 3.)
+            .with_rotation(Quat::from_rotation_x(90f32.to_radians())),
+        ..default()
+    });
+
+    /*
+    commands.spawn(PbrBundle {
+        mesh: sun_mesh,
+        material: sun_mat,
+        transform: sun_tform,
+        ..default()
+    });
+
+
+    commands.spawn(PbrBundle {
+        mesh: meshes.add(Plane3d::default().mesh().size(1000.0, 1000.0)),
+        material: materials.add(StandardMaterial {
+            base_color: Color::BLACK,
+            perceptual_roughness: 1.,
+            ..default()
+        }),
+        transform: Transform::from_xyz(offset * 3., 0., offset * 3.)
+            .with_rotation(Quat::from_rotation_x(-90f32.to_radians())),
+        ..default()
+    });
+    */
+
+    commands.spawn(PointLightBundle {
+        point_light: PointLight {
+            color: Color::WHITE,
+            intensity: 50_00_000_000.,
+            range: 500.,
+            radius: 0.4,
+            // shadows_enabled: true,
+            ..default()
+        },
+        transform: Transform::from_xyz(-offset * 2., offset * 2., -offset * 2.),
+        ..default()
+    });
 }
 
 fn main() {
