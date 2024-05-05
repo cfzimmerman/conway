@@ -31,40 +31,44 @@ fn init_conway_grid(
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
     let cube_mesh = assets.load("../assets/cube.glb#Mesh0/Primitive0");
+    commands.spawn_empty().with_children(|parent| {
+        // Oversize the board to make the edges look more alive
+        let gol = ConwayGol::build_rand(BOARD_SIZE * 2)
+            .expect("Conway grid must initialize in order to continue");
+        let board = gol.board();
 
-    // Oversize the board to make the edges look more alive
-    let gol = ConwayGol::build_rand(BOARD_SIZE * 2)
-        .expect("Conway grid must initialize in order to continue");
-    let board = gol.board();
+        let middle_cube = BOARD_SIZE as f32 / 2.;
+        let board_offset = BOARD_SIZE / 2;
 
-    let middle_cube = BOARD_SIZE as f32 / 2.;
-    let board_offset = BOARD_SIZE / 2;
-
-    let live_region = board_offset..(BOARD_SIZE + board_offset);
-    for row in live_region.clone() {
-        for col in live_region.clone() {
-            let x = CUBE_SPACING * (middle_cube - (row - board_offset) as f32);
-            let z = CUBE_SPACING * (middle_cube - (col - board_offset) as f32);
-            let color = if board[row][col] {
-                Color::ORANGE_RED
-            } else {
-                Color::WHITE
-            };
-            commands.spawn((
-                PbrBundle {
-                    mesh: cube_mesh.clone(),
-                    material: materials.add(StandardMaterial {
-                        base_color: color,
-                        ..default()
-                    }),
-                    transform: Transform::from_xyz(x, 0., z),
-                    ..Default::default()
-                },
-                CubeInd { row, col },
-            ));
+        let live_region = board_offset..(BOARD_SIZE + board_offset);
+        for row in live_region.clone() {
+            for col in live_region.clone() {
+                let x = CUBE_SPACING * (middle_cube - (row - board_offset) as f32);
+                let z = CUBE_SPACING * (middle_cube - (col - board_offset) as f32);
+                let color = if board[row][col] {
+                    Color::ORANGE_RED
+                } else {
+                    Color::WHITE
+                };
+                parent.spawn((
+                    PbrBundle {
+                        mesh: cube_mesh.clone(),
+                        material: materials.add(StandardMaterial {
+                            base_color: color,
+                            ..default()
+                        }),
+                        transform: Transform::from_xyz(x, 0., z),
+                        ..Default::default()
+                    },
+                    CubeInd { row, col },
+                ));
+            }
         }
-    }
+        parent.spawn(gol);
+    });
 }
+
+fn conway_tick() {}
 
 fn setup_scene(mut commands: Commands) {
     commands.spawn((

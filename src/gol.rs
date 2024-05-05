@@ -1,11 +1,12 @@
 use anyhow::bail;
+use bevy::ecs::component::Component;
 use rand::{
     distributions::{Bernoulli, Distribution},
     thread_rng,
 };
 
 /// Instantiates and manages board state in Conway's Game of Life.
-#[derive(Debug)]
+#[derive(Debug, Component)]
 pub struct ConwayGol {
     board: Vec<Vec<bool>>,
     buffer: Vec<Vec<bool>>,
