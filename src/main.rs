@@ -1,4 +1,6 @@
-use bevy::prelude::*;
+use std::time::Duration;
+
+use bevy::{prelude::*, time::common_conditions::on_timer};
 use conway::{
     camera::{ego_camera, hide_cursor, keyboard_motion, print_keybindings, CameraRotation},
     gol::ConwayGol,
@@ -48,13 +50,13 @@ fn init_conway_grid(
             let live_region = board_offset..(BOARD_SIZE + board_offset);
             for row in live_region.clone() {
                 for col in live_region.clone() {
-                    let x = CUBE_SPACING * (middle_cube - (row - board_offset) as f32);
-                    let z = CUBE_SPACING * (middle_cube - (col - board_offset) as f32);
                     let color = if board[row][col] {
                         Color::ORANGE_RED
                     } else {
                         Color::WHITE
                     };
+                    let x = CUBE_SPACING * (middle_cube - (row - board_offset) as f32);
+                    let z = CUBE_SPACING * (middle_cube - (col - board_offset) as f32);
                     parent.spawn((
                         PbrBundle {
                             mesh: cube_mesh.clone(),
@@ -117,17 +119,16 @@ fn main() {
             blue: 0.,
             alpha: 0.5,
         }))
-        /*
         .insert_resource(AmbientLight {
             brightness: 750.,
             ..AmbientLight::default()
         })
-        */
         .add_systems(Startup, (hide_cursor, setup_scene, init_conway_grid))
         .add_systems(
             Update,
             (
                 (ego_camera, keyboard_motion).chain(),
+                conway_tick.run_if(on_timer(Duration::from_secs(1))),
                 bevy::window::close_on_esc,
             ),
         )
