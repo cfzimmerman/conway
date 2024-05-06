@@ -33,4 +33,11 @@ There are two ways to access the project.
    - Build and run the project: `cargo run --release` (warning, the first compilation will take 1 to 5 minutes)
 2. Since the course requested binaries, I’ve also included those in [report](https://github.com/cfzimmerman/conway/tree/main/report). I’ve only tested the binaries on one M1 Mac and one x86-64 windows computer, so compatibility issues are definitely possible. If any arise, feel free to either email me or try to build from source.
 
+### Resources
+
+- https://bevyengine.org
+- https://docs.rs/bevy/latest/bevy
+- https://github.com/bevyengine/bevy/tree/main/examples
+- https://bevy-cheatbook.github.io
+
 ![High view](report/cw_high.png)
