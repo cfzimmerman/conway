@@ -1,4 +1,4 @@
-use bevy::{prelude::*, render::mesh::shape::Cube};
+use bevy::prelude::*;
 use conway::{
     camera::{
         display_controls, ego_camera, hide_cursor, keyboard_motion, CameraRotation, GameTimer,
@@ -117,7 +117,7 @@ fn setup_scene(
     let offset = BOARD_SIZE as f32;
     commands.spawn((
         Camera3dBundle {
-            transform: Transform::from_xyz(0., offset / 2., offset).looking_at(Vec3::ZERO, Vec3::Y),
+            transform: Transform::from_xyz(8., 8., 0.).looking_at(Vec3::ZERO, Vec3::Y),
             ..Camera3dBundle::default()
         },
         CameraRotation::default(),
@@ -135,18 +135,14 @@ fn setup_scene(
         ..default()
     });
 
-    let sun_pos = Transform::from_xyz(-offset * 2., offset * 2., -offset * 2.);
-
     commands.spawn(PointLightBundle {
         point_light: PointLight {
             color: Color::WHITE,
-            intensity: 10_000_000_000.,
+            intensity: 12_000_000_000.,
             range: offset * 8.,
-            radius: 0.4,
-            // shadows_enabled: true,
             ..default()
         },
-        transform: sun_pos,
+        transform: Transform::from_xyz(-offset, offset, -offset * 2.),
         ..default()
     });
 }
@@ -160,12 +156,6 @@ fn main() {
             blue: 0.,
             alpha: 0.5,
         }))
-        /*
-        .insert_resource(AmbientLight {
-            color: Color::WHITE,
-            brightness: 1000.,
-        })
-        */
         .add_systems(
             Startup,
             (hide_cursor, setup_scene, init_conway_grid, display_controls),
