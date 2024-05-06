@@ -1,4 +1,4 @@
-use bevy::prelude::*;
+use bevy::{prelude::*, render::mesh::shape::Cube};
 use conway::{
     camera::{
         display_controls, ego_camera, hide_cursor, keyboard_motion, CameraRotation, GameTimer,
@@ -27,7 +27,6 @@ fn init_conway_grid(
     let cube_mesh = meshes.add(Cuboid::new(2., 2., 2.));
     let cube_mat = materials.add(StandardMaterial {
         base_color: Color::WHITE,
-        perceptual_roughness: 0.08,
         ..default()
     });
     commands
@@ -125,49 +124,29 @@ fn setup_scene(
     ));
 
     commands.spawn(PbrBundle {
-        mesh: meshes.add(Plane3d::default().mesh().size(1000.0, 1000.0)),
+        mesh: meshes.add(Sphere::new(offset * 8.)),
         material: materials.add(StandardMaterial {
             base_color: Color::rgb(0.2, 0.2, 0.2),
             perceptual_roughness: 0.08,
+            cull_mode: None,
+            double_sided: true,
             ..default()
         }),
-        transform: Transform::from_xyz(-offset * 3., 0., -offset * 3.)
-            .with_rotation(Quat::from_rotation_x(90f32.to_radians())),
         ..default()
     });
 
-    /*
-    commands.spawn(PbrBundle {
-        mesh: sun_mesh,
-        material: sun_mat,
-        transform: sun_tform,
-        ..default()
-    });
-
-
-    commands.spawn(PbrBundle {
-        mesh: meshes.add(Plane3d::default().mesh().size(1000.0, 1000.0)),
-        material: materials.add(StandardMaterial {
-            base_color: Color::BLACK,
-            perceptual_roughness: 1.,
-            ..default()
-        }),
-        transform: Transform::from_xyz(offset * 3., 0., offset * 3.)
-            .with_rotation(Quat::from_rotation_x(-90f32.to_radians())),
-        ..default()
-    });
-    */
+    let sun_pos = Transform::from_xyz(-offset * 2., offset * 2., -offset * 2.);
 
     commands.spawn(PointLightBundle {
         point_light: PointLight {
             color: Color::WHITE,
-            intensity: 50_00_000_000.,
-            range: 500.,
+            intensity: 10_000_000_000.,
+            range: offset * 8.,
             radius: 0.4,
             // shadows_enabled: true,
             ..default()
         },
-        transform: Transform::from_xyz(-offset * 2., offset * 2., -offset * 2.),
+        transform: sun_pos,
         ..default()
     });
 }
