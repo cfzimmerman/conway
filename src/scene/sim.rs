@@ -181,8 +181,7 @@ impl Iterator for GridIter {
 
 #[cfg(test)]
 mod conway_tests {
-    use super::{ConwayGol, GridIter};
-    use crate::gol::Coord;
+    use super::{ConwayGol, Coord, GridIter};
 
     impl Coord {
         pub fn new(row: usize, col: usize) -> Self {

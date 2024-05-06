@@ -1,26 +1,9 @@
-use std::time::Duration;
-
+use super::{
+    sim::ConwayGol, CameraRotation, ControlMenu, GameTimer, Paused, MOUSE_SENSITIVITY,
+    POSITION_INCR,
+};
 use bevy::{input::mouse::MouseMotion, prelude::*, window::PrimaryWindow};
-
-use crate::gol::ConwayGol;
-
-const MOUSE_SENSITIVITY: f32 = 0.2;
-const POSITION_INCR: f32 = 0.25;
-
-#[derive(Component, Default)]
-pub struct CameraRotation {
-    yaw: f32,
-    pitch: f32,
-}
-
-#[derive(Component)]
-pub struct GameTimer(pub Timer);
-
-impl Default for GameTimer {
-    fn default() -> Self {
-        GameTimer(Timer::new(Duration::from_millis(500), TimerMode::Repeating))
-    }
-}
+use std::time::Duration;
 
 /// Handles keybindings and camera movement.
 pub fn keyboard_motion(
@@ -117,9 +100,6 @@ pub fn ego_camera(
     }
 }
 
-#[derive(Component)]
-pub struct ControlMenu;
-
 pub fn display_controls(mut commands: Commands) {
     let bindings = r#"
 - h: hide/show this menu
@@ -162,4 +142,14 @@ pub fn display_controls(mut commands: Commands) {
 /// Makes the cursor invisible over the main window.
 pub fn hide_cursor(mut primary_window: Query<&mut Window, With<PrimaryWindow>>) {
     (&mut primary_window.single_mut()).cursor.visible = false;
+}
+
+pub fn handle_click(
+    buttons: Res<ButtonInput<MouseButton>>,
+    mut game_state: Query<(&ConwayGol, &mut Paused)>,
+) {
+    if buttons.just_pressed(MouseButton::Left) {
+        let (_, mut sim) = game_state.single_mut();
+        sim.toggle();
+    }
 }
