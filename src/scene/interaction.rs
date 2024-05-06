@@ -7,7 +7,7 @@ use std::time::Duration;
 
 /// Manages the info text overlay at the top left of the screen
 pub fn display_controls(mut commands: Commands) {
-    let bindings = r#"
+    let bindings = r"
 - h: hide/show this menu
 
 - w: forward
@@ -20,7 +20,7 @@ pub fn display_controls(mut commands: Commands) {
 - up arrow: tick speed 2x
 - down arrow: tick speed 0.5x
 - escape: exit
-"#;
+";
 
     commands.spawn((
         TextBundle {
@@ -53,16 +53,13 @@ pub fn keyboard_motion(
     mut ctrl_menu: Query<(&mut Visibility, &ControlMenu)>,
     mut game_timer: Query<(&ConwayGol, &mut GameTimer)>,
 ) {
-    if !windows
-        .iter()
-        .fold(false, |acc, window| acc || window.focused)
-    {
+    if !windows.iter().any(|window| window.focused) {
         return;
     }
 
     // Events are non-exclusive. For example, the camera can go up and right
     // at the same time.
-    for (mut tform, _) in camera.iter_mut() {
+    for (mut tform, _) in &mut camera {
         if keys.pressed(KeyCode::KeyW) {
             let mut fwd: Vec3 = tform.forward().into();
             fwd.y = 0.;
@@ -120,11 +117,10 @@ pub fn ego_camera(
 ) {
     let delta = mouse_motion
         .read()
-        .into_iter()
         .fold(Vec2::ZERO, |acc, pos| acc + pos.delta);
     mouse_motion.clear();
 
-    for (mut tform, mut rotation) in camera.iter_mut() {
+    for (mut tform, mut rotation) in &mut camera {
         rotation.yaw -= delta.x * MOUSE_SENSITIVITY;
         rotation.pitch -= delta.y * MOUSE_SENSITIVITY;
         rotation.pitch = rotation.pitch.clamp(-89.9f32, 89.9f32);
@@ -139,7 +135,7 @@ pub fn ego_camera(
 
 /// Makes the cursor invisible over the main window.
 pub fn hide_cursor(mut primary_window: Query<&mut Window, With<PrimaryWindow>>) {
-    (&mut primary_window.single_mut()).cursor.visible = false;
+    primary_window.single_mut().cursor.visible = false;
 }
 
 /// Toggles the simulation's pause state when a user clicks
@@ -148,7 +144,6 @@ pub fn handle_click(
     mut game_state: Query<(&ConwayGol, &mut Paused)>,
 ) {
     if buttons.just_pressed(MouseButton::Left) {
-        let (_, mut sim) = game_state.single_mut();
-        sim.toggle();
+        game_state.single_mut().1.toggle();
     }
 }

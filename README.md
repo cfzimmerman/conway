@@ -1,3 +1,3 @@
 Resources:
 
-- https://bevy-cheatbook.github.io/cookbook/pan-orbit-camera.html
+video: https://youtu.be/fP9J3-yNa3Y

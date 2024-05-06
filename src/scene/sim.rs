@@ -13,8 +13,9 @@ pub struct ConwayGol {
 }
 
 impl ConwayGol {
-    /// Returns a Conway GoL board of dim x dim dimensions with a random
-    /// initial state
+    /// Returns a Conway Game of Life board of dim x dim dimensions with a random
+    /// initial state.
+    /// Errors if the board dimension is less than four.
     pub fn build_rand(dim: usize) -> anyhow::Result<Self> {
         if dim < 4 {
             bail!("Board dimension must be greater than 3");
@@ -66,7 +67,7 @@ impl ConwayGol {
         assert!(row < self.board.len());
         assert!(col < self.board[0].len());
         let mut ct = 0;
-        for nbr in GridIter::new(row, col).into_iter() {
+        for nbr in GridIter::new(row, col) {
             let Some(is_alive) = self.board.get(nbr.row).and_then(|row| row.get(nbr.col)) else {
                 continue;
             };
@@ -172,7 +173,7 @@ impl Iterator for GridIter {
         self.curr_col += 1;
         debug_assert_eq!(self.curr_col, self.origin_col);
         debug_assert_eq!(self.curr_row, self.origin_row);
-        return Some(res);
+        Some(res)
     }
 }
 
@@ -198,7 +199,7 @@ mod conway_tests {
     /// Tests the grid iterator on a fully in-bounds 9x9 chunk
     #[test]
     fn grid_iter_basic() {
-        let mut it = GridIter::new(1, 1).into_iter();
+        let mut it = GridIter::new(1, 1);
         assert_eq!(it.next().unwrap(), Coord::new(0, 0), "top left");
         assert_eq!(it.next().unwrap(), Coord::new(0, 1), "top mid");
         assert_eq!(it.next().unwrap(), Coord::new(0, 2), "top right");
@@ -213,7 +214,7 @@ mod conway_tests {
     /// Grid iterator on the top left corner
     #[test]
     fn grid_iter_top_left() {
-        let mut it = GridIter::new(0, 0).into_iter();
+        let mut it = GridIter::new(0, 0);
         assert_eq!(it.next().unwrap(), Coord::new(0, 1), "mid right");
         assert_eq!(it.next().unwrap(), Coord::new(1, 1), "bottom right");
         assert_eq!(it.next().unwrap(), Coord::new(1, 0), "bottom mid");
@@ -223,7 +224,7 @@ mod conway_tests {
     /// Grid iterator on the top row
     #[test]
     fn grid_iter_top() {
-        let mut it = GridIter::new(0, 1).into_iter();
+        let mut it = GridIter::new(0, 1);
         assert_eq!(it.next().unwrap(), Coord::new(0, 2), "mid right");
         assert_eq!(it.next().unwrap(), Coord::new(1, 2), "bottom right");
         assert_eq!(it.next().unwrap(), Coord::new(1, 1), "bottom mid");
