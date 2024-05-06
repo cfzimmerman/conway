@@ -1,7 +1,7 @@
 # Conway's Game of Life
 
 Cory Zimmerman  
-CS 175, Spring 2024
+CS 175, May 2024
 
 [Demo video](https://youtu.be/fP9J3-yNa3Y)
 
