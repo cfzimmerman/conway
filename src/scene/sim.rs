@@ -66,7 +66,6 @@ impl ConwayGol {
         assert!(row < self.board.len());
         assert!(col < self.board[0].len());
         let mut ct = 0;
-
         for nbr in GridIter::new(row, col).into_iter() {
             let Some(is_alive) = self.board.get(nbr.row).and_then(|row| row.get(nbr.col)) else {
                 continue;
@@ -75,7 +74,6 @@ impl ConwayGol {
                 ct += 1;
             }
         }
-
         ct
     }
 }
@@ -87,8 +85,7 @@ struct Coord {
     col: usize,
 }
 
-/// Iterates over the coordinates adjacent to an origin in a 2d
-/// grid.  
+/// Iterates over the coordinates adjacent to an origin in a 2d grid.  
 #[derive(Debug)]
 struct GridIter {
     origin_row: usize,

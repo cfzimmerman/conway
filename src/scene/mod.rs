@@ -1,20 +1,22 @@
-use std::time::Duration;
-
 use bevy::{
     ecs::component::Component,
     time::{Timer, TimerMode},
 };
+use std::time::Duration;
 
 pub mod interaction;
 pub mod sim;
 pub mod world;
 
+/// Units moved per event trigger
 const MOUSE_SENSITIVITY: f32 = 0.2;
 const POSITION_INCR: f32 = 0.25;
 
+/// Configures the size of the grid of cubes
 const BOARD_SIZE: usize = 2usize.pow(7);
 const CUBE_SPACING: f32 = 2.25;
 
+/// Whether or not the cube simulation is paused.
 #[derive(Component)]
 pub struct Paused(bool);
 
@@ -29,12 +31,14 @@ impl Paused {
     }
 }
 
+/// Controls the rotation of the ego camera
 #[derive(Component, Default)]
 pub struct CameraRotation {
     yaw: f32,
     pitch: f32,
 }
 
+/// Tracks when the game state needs to be ticked
 #[derive(Component)]
 pub struct GameTimer(pub Timer);
 
@@ -44,11 +48,13 @@ impl Default for GameTimer {
     }
 }
 
+/// Associates a cube with its row, col pair in the underlying simulation grid
 #[derive(Component, Default)]
 pub struct CubeInd {
     row: usize,
     col: usize,
 }
 
+/// Marker struct for help menu text
 #[derive(Component)]
 pub struct ControlMenu;

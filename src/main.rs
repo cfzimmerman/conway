@@ -4,6 +4,8 @@ use conway::scene::{
     world::{init_conway_grid, next_game_tick, setup_world},
 };
 
+/// Run's Conway's Game of Life in 3d
+
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
