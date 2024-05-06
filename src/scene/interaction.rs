@@ -8,6 +8,7 @@ use std::time::Duration;
 /// Manages the info text overlay at the top left of the screen
 pub fn display_controls(mut commands: Commands) {
     let bindings = r"
+- left click: pause/play
 - h: hide/show this menu
 
 - w: forward
@@ -16,7 +17,6 @@ pub fn display_controls(mut commands: Commands) {
 - d: right
 - space: up
 - shift: down
-- left click: pause/play
 - up arrow: tick speed 2x
 - down arrow: tick speed 0.5x
 - escape: exit

@@ -62,7 +62,7 @@ pub fn init_conway_grid(
     commands
         .spawn_empty()
         .insert(gol)
-        .insert(Paused(false))
+        .insert(Paused(true))
         .insert(GameTimer::default())
         .insert(Transform::default())
         .insert(GlobalTransform::default())
