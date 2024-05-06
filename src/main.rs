@@ -6,7 +6,7 @@ use conway::{
     gol::ConwayGol,
 };
 
-const BOARD_SIZE: usize = 2usize.pow(6);
+const BOARD_SIZE: usize = 2usize.pow(7);
 const CUBE_SPACING: f32 = 2.25;
 
 #[derive(Component, Default)]
